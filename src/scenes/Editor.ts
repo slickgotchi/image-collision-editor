@@ -1,10 +1,16 @@
 import { ConvertGame } from "../utils/ConvertGame";
 import { ConvertPhaser } from "../utils/ConvertPhaser";
 import { GlobalData } from "../utils/GlobalData";
+import { Mode } from "./UI";
 
 
 export class Editor extends Phaser.Scene {
-    private isDragging = false;
+    private isScrolling = false;
+    private isEditing = false;
+
+    // shapes
+    private activeShapeIdx = 0;
+    private rectangles: Phaser.GameObjects.Rectangle[] = [];
 
     constructor() {
         super('editor');
@@ -51,12 +57,14 @@ export class Editor extends Phaser.Scene {
         // PAN
         this.input.on('pointerdown', (pointer: Phaser.Input.Pointer) => {
             if (pointer.button === 1) {
-                this.isDragging = true;
+                this.isScrolling = true;
             }
         });
 
+        // DRAG (IF MIDDLE CLICK)
         this.input.on('pointermove', (pointer: any) => {
-            if (this.isDragging) {
+            // do scrolling
+            if (this.isScrolling) {
                 const dx = pointer.position.x - pointer.prevPosition.x;
                 const dy = pointer.position.y - pointer.prevPosition.y;
                 const zoom = this.cameras.main.zoom;
@@ -71,6 +79,40 @@ export class Editor extends Phaser.Scene {
                 }
             }
 
+            // do shape editing?
+            if (this.isEditing) {
+                switch (GlobalData.mode) {
+                    case Mode.Rectangle: {
+                        const rect = this.rectangles[this.activeShapeIdx];
+
+                        const curr = {
+                            x: GlobalData.game.x,
+                            y: GlobalData.game.y
+                        }
+
+                        const start = {
+                            x: ConvertPhaser.xToGame(rect.x, this),
+                            y: ConvertPhaser.yToGame(rect.y, this)
+                        }
+
+                        const width =  curr.x - start.x;
+                        const height = curr.y - start.y;
+                        
+                        rect.setOrigin(
+                            width > 0 ? 0 : 1,
+                            height > 0 ? 1 : 0
+                        );
+                        rect.setSize(
+                            ConvertGame.dimToPhaser(Math.abs(width), this), 
+                            ConvertGame.dimToPhaser(Math.abs(height), this)
+                        );
+
+                        break;
+                    }
+                    default: break;
+                }
+            }
+
             // update screen pos
             GlobalData.screen.x = pointer.position.x;
             GlobalData.screen.y = pointer.position.y;
@@ -82,10 +124,56 @@ export class Editor extends Phaser.Scene {
 
         // CLICK
         this.input.on('pointerup', (pointer: Phaser.Input.Pointer) => {
-            this.isDragging = false;
-            console.log(`Game Coord: ${GlobalData.game.x.toFixed(2)}, ${GlobalData.game.y.toFixed(2)}`)
-        })
+            this.isScrolling = false;
+            
+            if (pointer.button === 1) return;
+            switch (GlobalData.mode) {
+                case Mode.Move: {
+
+                    break;
+                }
+                case Mode.Rectangle: {
+                    // if not editing start a rectangle
+                    if (!this.isEditing) {
+                        this.startRectangle(GlobalData.game.x, GlobalData.game.y);
+                        this.isEditing = true;
+                    } else {
+                        this.finishRectangle(GlobalData.game.x, GlobalData.game.y);
+                        this.isEditing = false;
+                    }
+                    break;
+                }
+                case Mode.Circle: {
+
+                    break;
+                }
+                case Mode.Polygon: {
+
+                    break;
+                }
+                default: break;
+            }
+        });
     }
 
+
+    startRectangle(x: number, y: number) {
+        this.rectangles.push(this.add.rectangle(
+            ConvertGame.xToPhaser(x, this), 
+            ConvertGame.yToPhaser(y, this),
+            1,
+            1
+        ));
+        this.activeShapeIdx = this.rectangles.length - 1;
+        const rect = this.rectangles[this.activeShapeIdx];
+        rect.setFillStyle(0xffffff, 0.2);
+        rect.setStrokeStyle(2, 0xffffff);
+        rect.setDepth(2);
+        rect.setOrigin(0,1);
+    }
+
+    finishRectangle(x: number, y: number) {
+
+    }
 
 }

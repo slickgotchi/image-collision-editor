@@ -1,3 +1,5 @@
+import { Mode } from "../scenes/UI";
+
 interface iGlobalData {
     screen: {
         x: number,
@@ -12,6 +14,7 @@ interface iGlobalData {
         x: number,
         y: number
     }
+    mode: Mode
 }
 
 export const GlobalData: iGlobalData = {
@@ -27,5 +30,6 @@ export const GlobalData: iGlobalData = {
         x: 0,
         y: 0
     },
-    zoom: 1
+    zoom: 1,
+    mode: Mode.None
 }
