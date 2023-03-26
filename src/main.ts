@@ -1,5 +1,7 @@
 import Phaser from 'phaser';
+import { BootStrap } from './scenes/BootStrap';
 import { Editor } from './scenes/Editor';
+import { UI } from './scenes/UI';
 
 // create game config
 const config = {
@@ -10,7 +12,7 @@ const config = {
         width: 1920,
         height: 1080,
     },
-    scene: [Editor],
+    scene: [BootStrap, Editor, UI],
 }
 
 // create the phaser game
