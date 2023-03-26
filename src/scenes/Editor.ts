@@ -1,6 +1,7 @@
 import { Rectangle } from "../shapes/Rectangle";
 import { ConvertGame } from "../utils/ConvertGame";
 import { ConvertPhaser } from "../utils/ConvertPhaser";
+import { FileHandler } from "../utils/FileHandler";
 import { GlobalData } from "../utils/GlobalData";
 import { Mode } from "./UI";
 
@@ -164,6 +165,11 @@ export class Editor extends Phaser.Scene {
                 const rect = this.rectangles.pop();
                 rect?.destroy();
             }
+        })
+
+        // ENTER (PRINT)
+        this.input.keyboard?.on('keyup-SPACE', () => {
+            FileHandler.writeRectangleData("test.json", this.rectangles, this);
         })
     }
 
