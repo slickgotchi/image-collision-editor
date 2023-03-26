@@ -1,4 +1,6 @@
 import { ConvertGame } from "../utils/ConvertGame";
+import { ConvertPhaser } from "../utils/ConvertPhaser";
+import { GlobalData } from "../utils/GlobalData";
 
 
 export class Editor extends Phaser.Scene {
@@ -41,6 +43,9 @@ export class Editor extends Phaser.Scene {
             if (zoom > MAX_ZOOM) zoom = MAX_ZOOM;
             else if (zoom < MIN_ZOOM) zoom = MIN_ZOOM;
             this.cameras.main.setZoom(zoom);
+
+            // set global data
+            GlobalData.zoom = zoom;
         });
 
         // PAN
@@ -54,18 +59,31 @@ export class Editor extends Phaser.Scene {
             if (this.isDragging) {
                 const dx = pointer.position.x - pointer.prevPosition.x;
                 const dy = pointer.position.y - pointer.prevPosition.y;
-                
                 const zoom = this.cameras.main.zoom;
+
                 this.cameras.main.scrollX -= dx / zoom;
                 this.cameras.main.scrollY -= dy / zoom;
+
+                // set global data
+                GlobalData.scroll = {
+                    x: this.cameras.main.scrollX,
+                    y: this.cameras.main.scrollY
+                }
             }
+
+            // update screen pos
+            GlobalData.screen.x = pointer.position.x;
+            GlobalData.screen.y = pointer.position.y;
+
+            // update game pos
+            GlobalData.game.x = ConvertPhaser.xToGame(pointer.position.x, this) / GlobalData.zoom + ConvertPhaser.dimToGame(this.cameras.main.scrollX, this);
+            GlobalData.game.y = ConvertPhaser.yToGame(pointer.position.y, this) / GlobalData.zoom - ConvertPhaser.dimToGame(this.cameras.main.scrollY, this);
         })
 
         // CLICK
         this.input.on('pointerup', (pointer: Phaser.Input.Pointer) => {
             this.isDragging = false;
-
-            console.log(pointer.x.toFixed(2), pointer.y.toFixed(2));
+            console.log(`Game Coord: ${GlobalData.game.x.toFixed(2)}, ${GlobalData.game.y.toFixed(2)}`)
         })
     }
 
