@@ -1,3 +1,4 @@
+import { Rectangle } from "../shapes/Rectangle";
 import { ConvertGame } from "../utils/ConvertGame";
 import { ConvertPhaser } from "../utils/ConvertPhaser";
 import { GlobalData } from "../utils/GlobalData";
@@ -10,7 +11,7 @@ export class Editor extends Phaser.Scene {
 
     // shapes
     private activeShapeIdx = 0;
-    private rectangles: Phaser.GameObjects.Rectangle[] = [];
+    private rectangles: Rectangle[] = [];
 
     constructor() {
         super('editor');
@@ -63,7 +64,7 @@ export class Editor extends Phaser.Scene {
 
         // DRAG (IF MIDDLE CLICK)
         this.input.on('pointermove', (pointer: any) => {
-            // do scrolling
+            // do scrolling if applicable
             if (this.isScrolling) {
                 const dx = pointer.position.x - pointer.prevPosition.x;
                 const dy = pointer.position.y - pointer.prevPosition.y;
@@ -73,17 +74,23 @@ export class Editor extends Phaser.Scene {
                 this.cameras.main.scrollY -= dy / zoom;
 
                 // set global data
-                GlobalData.scroll = {
-                    x: this.cameras.main.scrollX,
-                    y: this.cameras.main.scrollY
-                }
+                GlobalData.scroll.x = this.cameras.main.scrollX;
+                GlobalData.scroll.y = this.cameras.main.scrollY;
             }
+
+            // update screen pos
+            GlobalData.screen.x = pointer.position.x;
+            GlobalData.screen.y = pointer.position.y;
+
+            // update game pos
+            GlobalData.game.x = ConvertPhaser.xToGame(pointer.position.x, this) / GlobalData.zoom + ConvertPhaser.dimToGame(this.cameras.main.scrollX, this);
+            GlobalData.game.y = ConvertPhaser.yToGame(pointer.position.y, this) / GlobalData.zoom - ConvertPhaser.dimToGame(this.cameras.main.scrollY, this);
 
             // do shape editing?
             if (this.isEditing) {
                 switch (GlobalData.mode) {
                     case Mode.Rectangle: {
-                        const rect = this.rectangles[this.activeShapeIdx];
+                        const rect = this.rectangles[this.activeShapeIdx].phaserRectangle;
 
                         const curr = {
                             x: GlobalData.game.x,
@@ -107,19 +114,15 @@ export class Editor extends Phaser.Scene {
                             ConvertGame.dimToPhaser(Math.abs(height), this)
                         );
 
+                        this.rectangles[this.activeShapeIdx].updatePoints();
+
                         break;
                     }
                     default: break;
                 }
             }
 
-            // update screen pos
-            GlobalData.screen.x = pointer.position.x;
-            GlobalData.screen.y = pointer.position.y;
-
-            // update game pos
-            GlobalData.game.x = ConvertPhaser.xToGame(pointer.position.x, this) / GlobalData.zoom + ConvertPhaser.dimToGame(this.cameras.main.scrollX, this);
-            GlobalData.game.y = ConvertPhaser.yToGame(pointer.position.y, this) / GlobalData.zoom - ConvertPhaser.dimToGame(this.cameras.main.scrollY, this);
+            
         })
 
         // CLICK
@@ -154,20 +157,29 @@ export class Editor extends Phaser.Scene {
                 default: break;
             }
         });
+
+        // UNDO
+        this.input.keyboard?.on('keyup-Z', () => {
+            if (this.rectangles.length > 0) {
+                const rect = this.rectangles.pop();
+                rect?.destroy();
+            }
+        })
     }
 
 
     startRectangle(x: number, y: number) {
-        this.rectangles.push(this.add.rectangle(
+        const rect = this.add.rectangle(
             ConvertGame.xToPhaser(x, this), 
             ConvertGame.yToPhaser(y, this),
             1,
             1
-        ));
+        );
+        this.rectangles.push(new Rectangle(rect));
+
         this.activeShapeIdx = this.rectangles.length - 1;
-        const rect = this.rectangles[this.activeShapeIdx];
         rect.setFillStyle(0xffffff, 0.2);
-        rect.setStrokeStyle(2, 0xffffff);
+        rect.setStrokeStyle(3, 0xff00ff);
         rect.setDepth(2);
         rect.setOrigin(0,1);
     }

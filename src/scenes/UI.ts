@@ -74,6 +74,7 @@ export class UI extends Phaser.Scene {
         btn.setOrigin(0, 1);
         btn.setScrollFactor(0);
         btn.setDepth(1);
+        btn.setStrokeStyle(5, 0xffffff, 1);
     }
 
     updateButtons() {
