@@ -1,3 +1,4 @@
+import { Editor } from "../scenes/Editor";
 import { Mode } from "../scenes/UI";
 
 interface iGlobalData {
@@ -14,7 +15,9 @@ interface iGlobalData {
         x: number,
         y: number
     }
-    mode: Mode
+    mode: Mode;
+    loadedData?: any;
+    editorRef?: Editor
 }
 
 export const GlobalData: iGlobalData = {

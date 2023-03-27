@@ -1,4 +1,5 @@
 import Phaser from "phaser";
+import { GlobalData } from "./GlobalData";
 
 export const ConvertPhaser = {
     // screen ratio
@@ -21,6 +22,16 @@ export const ConvertPhaser = {
         const { height } = scene.scale;
         return (ConvertPhaser.screen.height * (height - ConvertPhaser.screen.origin.y*height - y)) / height;
     },
+
+    // xToGame: (x: number, scene: Phaser.Scene) => {
+    //     const { width } = scene.scale;
+    //     return ((x - ConvertPhaser.screen.origin.x*width)*ConvertPhaser.screen.width/width) / scene.cameras.main.zoom + ConvertPhaser.dimToGame(scene.cameras.main.scrollX, scene);
+    // },
+
+    // yToGame: (y: number, scene: Phaser.Scene) => {
+    //     const { height } = scene.scale;
+    //     return ((ConvertPhaser.screen.height * (height - ConvertPhaser.screen.origin.y*height - y)) / height) / scene.cameras.main.zoom + ConvertPhaser.dimToGame(scene.cameras.main.scrollY, scene);
+    // },
 
     // yInvertToPhaser: (y: number, scene: Phaser.Scene) => {
     //     const zoom = scene.cameras.main.zoom;

@@ -1,6 +1,8 @@
 import { Rectangle } from "../shapes/Rectangle";
+import { Shape } from "../shapes/Shape";
 import { ConvertGame } from "../utils/ConvertGame";
 import { ConvertPhaser } from "../utils/ConvertPhaser";
+import { ConvertScreen } from "../utils/ConvertScreen";
 import { FileHandler } from "../utils/FileHandler";
 import { GlobalData } from "../utils/GlobalData";
 import { Mode } from "./UI";
@@ -12,7 +14,7 @@ export class Editor extends Phaser.Scene {
 
     // shapes
     private activeShapeIdx = 0;
-    private rectangles: Rectangle[] = [];
+    private shapes: Shape[] = [];
 
     constructor() {
         super('editor');
@@ -35,10 +37,23 @@ export class Editor extends Phaser.Scene {
         img.setDepth(0);
         
         this.createInputHandlers();
+        this.createFileGenerator();
+
+        GlobalData.editorRef = this;
     }
 
     update(time: number, dt_ms: number) {
         
+    }
+
+    createFileGenerator() {
+        const gen = document.getElementById('generate');
+        const filename = document.getElementById('generate-filename') as HTMLInputElement;
+        if (gen && filename) {
+            gen.onclick = () => {
+                FileHandler.download(this, this.shapes, filename.value + '.json');
+            }
+        }
     }
 
     createInputHandlers() {
@@ -84,39 +99,20 @@ export class Editor extends Phaser.Scene {
             GlobalData.screen.y = pointer.position.y;
 
             // update game pos
-            GlobalData.game.x = ConvertPhaser.xToGame(pointer.position.x, this) / GlobalData.zoom + ConvertPhaser.dimToGame(this.cameras.main.scrollX, this);
-            GlobalData.game.y = ConvertPhaser.yToGame(pointer.position.y, this) / GlobalData.zoom - ConvertPhaser.dimToGame(this.cameras.main.scrollY, this);
+            // GlobalData.game.x = ConvertPhaser.xToGame(pointer.position.x, this) / GlobalData.zoom + ConvertPhaser.dimToGame(this.cameras.main.scrollX, this);
+            // GlobalData.game.y = ConvertPhaser.yToGame(pointer.position.y, this) / GlobalData.zoom - ConvertPhaser.dimToGame(this.cameras.main.scrollY, this);
+            GlobalData.game.x = ConvertPhaser.xToGame(pointer.position.x, this);
+            GlobalData.game.y = ConvertPhaser.yToGame(pointer.position.y, this);
 
             // do shape editing?
             if (this.isEditing) {
                 switch (GlobalData.mode) {
                     case Mode.Rectangle: {
-                        const rect = this.rectangles[this.activeShapeIdx].phaserRectangle;
-
-                        const curr = {
-                            x: GlobalData.game.x,
-                            y: GlobalData.game.y
-                        }
-
-                        const start = {
-                            x: ConvertPhaser.xToGame(rect.x, this),
-                            y: ConvertPhaser.yToGame(rect.y, this)
-                        }
-
-                        const width =  curr.x - start.x;
-                        const height = curr.y - start.y;
-                        
-                        rect.setOrigin(
-                            width > 0 ? 0 : 1,
-                            height > 0 ? 1 : 0
-                        );
-                        rect.setSize(
-                            ConvertGame.dimToPhaser(Math.abs(width), this), 
-                            ConvertGame.dimToPhaser(Math.abs(height), this)
-                        );
-
-                        this.rectangles[this.activeShapeIdx].updatePoints();
-
+                        const rect = this.shapes[this.activeShapeIdx] as Rectangle;
+                        rect.editUpdate(
+                            ConvertScreen.xToGame(pointer.position.x, this),
+                            ConvertScreen.yToGame(pointer.position.y, this)
+                        )
                         break;
                     }
                     default: break;
@@ -139,10 +135,16 @@ export class Editor extends Phaser.Scene {
                 case Mode.Rectangle: {
                     // if not editing start a rectangle
                     if (!this.isEditing) {
-                        this.startRectangle(GlobalData.game.x, GlobalData.game.y);
+                        this.shapes.push(new Rectangle(
+                            this, 
+                            ConvertScreen.xToGame(pointer.position.x, this),
+                            ConvertScreen.yToGame(pointer.position.y, this),
+                            ConvertScreen.dimToGame(1, this),
+                            ConvertScreen.dimToGame(1, this)
+                        ));
+                        this.activeShapeIdx = this.shapes.length - 1;
                         this.isEditing = true;
                     } else {
-                        this.finishRectangle(GlobalData.game.x, GlobalData.game.y);
                         this.isEditing = false;
                     }
                     break;
@@ -161,39 +163,35 @@ export class Editor extends Phaser.Scene {
 
         // UNDO
         this.input.keyboard?.on('keyup-Z', () => {
-            if (this.rectangles.length > 0) {
-                const rect = this.rectangles.pop();
-                rect?.destroy();
+            if (this.shapes.length > 0) {
+                const shape = this.shapes.pop();
+                shape?.destroy();
             }
         })
 
-        // ENTER (PRINT)
-        this.input.keyboard?.on('keyup-S', () => {
-            // FileHandler.writeRectangleData("test.json", this.rectangles, this);
-            FileHandler.download(this, this.rectangles, 'test.json');
-        })
+        // // ENTER (PRINT)
+        // this.input.keyboard?.on('keyup-S', () => {
+        //     // FileHandler.writeRectangleData("test.json", this.rectangles, this);
+            
+        // })
     }
 
-
-    startRectangle(x: number, y: number) {
-        const rect = this.add.rectangle(
-            ConvertGame.xToPhaser(x, this), 
-            ConvertGame.yToPhaser(y, this),
-            1,
-            1
-        );
-        this.rectangles.push(new Rectangle(rect));
-
-        this.activeShapeIdx = this.rectangles.length - 1;
-        rect.setFillStyle(0xffffff, 0.2);
-        rect.setStrokeStyle(3, 0xff00ff);
-        rect.setDepth(2);
-        rect.setOrigin(0,1);
-    }
-
-    finishRectangle(x: number, y: number) {
-
-    }
+    // generateLoadedRectangles() {
+    //     const rects = GlobalData.loadedData;
+    //     rects.map((r: any) => {
+    //         const rect = this.add.rectangle(
+    //             ConvertGame.xToPhaser(r.x, this), 
+    //             ConvertGame.yToPhaser(r.y, this),
+    //             ConvertGame.dimToPhaser(r.width, this),
+    //             ConvertGame.dimToPhaser(r.height, this)
+    //         );
+    //         this.rectangles.push(new Rectangle(rect));
+    //         rect.setFillStyle(0xffffff, 0.2);
+    //         rect.setStrokeStyle(3, 0xff00ff);
+    //         rect.setDepth(2);
+    //         rect.setOrigin(0,1);
+    //     })
+    // }
 
 }
 

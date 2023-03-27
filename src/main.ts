@@ -2,6 +2,7 @@ import Phaser from 'phaser';
 import { BootStrap } from './scenes/BootStrap';
 import { Editor } from './scenes/Editor';
 import { UI } from './scenes/UI';
+import { GlobalData } from './utils/GlobalData';
 
 // create game config
 const config = {
@@ -37,7 +38,9 @@ function readFile(evt: any) {
     var file = files[0];
     var reader = new FileReader();
     reader.onload = function(event: any) {
-      console.log(event.target.result);
+        GlobalData.loadedData = JSON.parse(event.target.result);
+        // GlobalData.editorRef?.generateLoadedRectangles();
+        console.log(GlobalData.loadedData);
     }
     reader.readAsText(file)
-  }
+}
