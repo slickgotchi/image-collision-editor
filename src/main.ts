@@ -24,3 +24,20 @@ document.addEventListener("keyup", (e) => {
         game.scale.toggleFullscreen();
     }
 }, false);
+
+
+
+const file = document.getElementById('file');
+if (file) {
+    file.addEventListener('change', readFile, false);
+}
+
+function readFile(evt: any) {
+    var files = evt.target.files;
+    var file = files[0];
+    var reader = new FileReader();
+    reader.onload = function(event: any) {
+      console.log(event.target.result);
+    }
+    reader.readAsText(file)
+  }

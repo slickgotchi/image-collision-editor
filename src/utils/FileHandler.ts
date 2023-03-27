@@ -29,10 +29,36 @@ export const FileHandler = {
         if (output) {
             output.innerHTML = strData;
         }
-        // fs.writeFile('../files/'+filename, strData, (err) => {
-        //     if (err) {
-        //         console.log(err);
-        //     }
-        // });
+    },
+    download: (scene: Phaser.Scene, data: Rectangle[], fileName: string, contentType: string = 'text/json') => {
+        const rects: iRectangleDatum[] = [];
+        data.map(r => {
+            const bl = r.phaserRectangle.getBottomLeft();
+            if (bl && bl.x && bl.y) {
+                rects.push({
+                    x: ConvertPhaser.xToGame(bl.x, scene),
+                    y: ConvertPhaser.yToGame(bl.y, scene),
+                    width: ConvertPhaser.dimToGame(r.phaserRectangle.width, scene),
+                    height: ConvertPhaser.dimToGame(r.phaserRectangle.height, scene)
+                });
+            }
+        });
+
+        const strData = JSON.stringify(rects);
+        var a = document.createElement("a");
+        var file = new Blob([strData], {type: contentType});
+        a.href = URL.createObjectURL(file);
+        a.download = fileName;
+        a.click();
     }
 }
+
+
+// function download(content: any, fileName: string, contentType: string = 'text/json') {
+//     var a = document.createElement("a");
+//     var file = new Blob([content], {type: contentType});
+//     a.href = URL.createObjectURL(file);
+//     a.download = fileName;
+//     a.click();
+// }
+// download(jsonData, 'json.txt', 'text/plain');

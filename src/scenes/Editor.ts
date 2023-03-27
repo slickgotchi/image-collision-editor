@@ -168,8 +168,9 @@ export class Editor extends Phaser.Scene {
         })
 
         // ENTER (PRINT)
-        this.input.keyboard?.on('keyup-SPACE', () => {
-            FileHandler.writeRectangleData("test.json", this.rectangles, this);
+        this.input.keyboard?.on('keyup-S', () => {
+            // FileHandler.writeRectangleData("test.json", this.rectangles, this);
+            FileHandler.download(this, this.rectangles, 'test.json');
         })
     }
 
@@ -195,3 +196,4 @@ export class Editor extends Phaser.Scene {
     }
 
 }
+
