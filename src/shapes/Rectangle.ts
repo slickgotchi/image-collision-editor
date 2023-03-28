@@ -90,6 +90,10 @@ export class Rectangle extends Shape {
 
     }
 
+    destroy() {
+        this.rect.destroy();
+    }
+
     // updatePoints() {
     //     this.trPoint.setPosition(
     //         this.phaserRectangle.getTopRight().x,

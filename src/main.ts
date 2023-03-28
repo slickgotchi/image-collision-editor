@@ -12,6 +12,7 @@ const config = {
         autoCenter: Phaser.Scale.CENTER_BOTH,
         width: 1920,
         height: 1080,
+        parent: "editor"
     },
     scene: [BootStrap, Editor, UI],
 }
@@ -39,7 +40,7 @@ function readFile(evt: any) {
     var reader = new FileReader();
     reader.onload = function(event: any) {
         GlobalData.loadedData = JSON.parse(event.target.result);
-        // GlobalData.editorRef?.generateLoadedRectangles();
+        GlobalData.editorRef?.generateLoadedRectangles();
         console.log(GlobalData.loadedData);
     }
     reader.readAsText(file)

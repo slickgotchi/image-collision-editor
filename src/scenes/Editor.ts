@@ -176,22 +176,36 @@ export class Editor extends Phaser.Scene {
         // })
     }
 
-    // generateLoadedRectangles() {
-    //     const rects = GlobalData.loadedData;
-    //     rects.map((r: any) => {
-    //         const rect = this.add.rectangle(
-    //             ConvertGame.xToPhaser(r.x, this), 
-    //             ConvertGame.yToPhaser(r.y, this),
-    //             ConvertGame.dimToPhaser(r.width, this),
-    //             ConvertGame.dimToPhaser(r.height, this)
-    //         );
-    //         this.rectangles.push(new Rectangle(rect));
-    //         rect.setFillStyle(0xffffff, 0.2);
-    //         rect.setStrokeStyle(3, 0xff00ff);
-    //         rect.setDepth(2);
-    //         rect.setOrigin(0,1);
-    //     })
-    // }
+    generateLoadedRectangles() {
+        const rects = GlobalData.loadedData;
+        rects.map((r: any) => {
+            const rect = new Rectangle(
+                this, 
+                r.x,
+                r.y,
+                r.width,
+                r.height
+            )
+            this.shapes.push(rect);
+            rect.rect.setOrigin(0,1);
+            console.log(r);
+            this.activeShapeIdx = this.shapes.length - 1;
+
+
+
+            // const rect = this.add.rectangle(
+            //     ConvertGame.xToPhaser(r.x, this), 
+            //     ConvertGame.yToPhaser(r.y, this),
+            //     ConvertGame.dimToPhaser(r.width, this),
+            //     ConvertGame.dimToPhaser(r.height, this)
+            // );
+            // this.rectangles.push(new Rectangle(rect));
+            // rect.setFillStyle(0xffffff, 0.2);
+            // rect.setStrokeStyle(3, 0xff00ff);
+            // rect.setDepth(2);
+            // rect.setOrigin(0,1);
+        })
+    }
 
 }
 

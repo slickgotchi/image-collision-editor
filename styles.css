@@ -3,6 +3,7 @@
   margin: 0;
   padding: 0;
   background-color: rgb(76, 76, 76);
+  font-family: monospace;
 }
 
 body {  
@@ -11,8 +12,27 @@ body {
   height: 100%;
 }
 
-#filehandler {
+#app {
+  display: flex;
+  flex-flow: column nowrap;
+  align-items: center;
+
+  width: 100%;
+  height: 100%;
   padding: 1rem;
+}
+
+h1 {
+  text-align: center;
+  margin: 0.5rem;
+}
+
+#filehandler {
+  margin: 0.5rem;
+
+  display: flex;
+  flex-flow: row nowrap;
+  justify-content: space-evenly;
 }
 
 #filehandler > button {
@@ -22,4 +42,11 @@ body {
 
 #filehandler > button:hover {
   cursor: pointer;
+}
+
+#editor {
+  margin: 1rem;
+  margin-bottom: 5rem;
+  width: 100%;
+  height: 90%;
 }
