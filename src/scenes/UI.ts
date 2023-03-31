@@ -2,20 +2,22 @@ import { GlobalData } from "../utils/GlobalData";
 
 export enum Mode {
     None,
-    Move,
+    Dot,
     Rectangle,
     Circle,
-    Polygon
+    Polygon,
+    Move,
 }
 
 export class UI extends Phaser.Scene {
     private infoLogRect!: Phaser.GameObjects.Rectangle;
     private infoLogText!: Phaser.GameObjects.Text;
 
-    private moveButton!: Phaser.GameObjects.Rectangle;
+    private dotButton!: Phaser.GameObjects.Rectangle;
     private rectButton!: Phaser.GameObjects.Rectangle;
     private circButton!: Phaser.GameObjects.Rectangle;
     private polyButton!: Phaser.GameObjects.Rectangle;
+    private moveButton!: Phaser.GameObjects.Rectangle;
 
     constructor() {
         super('ui');
@@ -55,10 +57,10 @@ export class UI extends Phaser.Scene {
         const PAD = 10;
         const SIZE = 100;
 
-        this.moveButton = this.add.rectangle(PAD, 1080-PAD, SIZE, SIZE, 0x000000);
-        this.setupButton(this.moveButton);
+        this.dotButton = this.add.rectangle(PAD + 0*(PAD+SIZE), 1080-PAD, SIZE, SIZE, 0x000000);
+        this.setupButton(this.dotButton);
 
-        this.rectButton = this.add.rectangle(PAD + (PAD+SIZE), 1080-PAD, SIZE, SIZE, 0x000000);
+        this.rectButton = this.add.rectangle(PAD + 1*(PAD+SIZE), 1080-PAD, SIZE, SIZE, 0x000000);
         this.setupButton(this.rectButton);
 
         this.circButton = this.add.rectangle(PAD+ 2*(PAD+SIZE), 1080-PAD, SIZE, SIZE, 0x000000);
@@ -66,6 +68,9 @@ export class UI extends Phaser.Scene {
 
         this.polyButton = this.add.rectangle(PAD+ 3*(PAD+SIZE), 1080-PAD, SIZE, SIZE, 0x000000);
         this.setupButton(this.polyButton);
+
+        this.moveButton = this.add.rectangle(PAD + 4*(PAD+SIZE), 1080-PAD, SIZE, SIZE, 0x000000);
+        this.setupButton(this.moveButton);
 
         this.updateButtons();
     }
@@ -78,30 +83,36 @@ export class UI extends Phaser.Scene {
     }
 
     updateButtons() {
-        this.moveButton.setAlpha(GlobalData.mode === 1 ? 1 : 0.5);
+        this.dotButton.setAlpha(GlobalData.mode === Mode.Dot ? 1 : 0.5);
         this.rectButton.setAlpha(GlobalData.mode === 2 ? 1 : 0.5);
         this.circButton.setAlpha(GlobalData.mode === 3 ? 1 : 0.5);
         this.polyButton.setAlpha(GlobalData.mode === 4 ? 1 : 0.5);
+        this.moveButton.setAlpha(GlobalData.mode === 5 ? 1 : 0.5);
     }
 
     createInput() {
-        this.input.keyboard?.on('keyup-M', () => {
-            GlobalData.mode = 1;
+        this.input.keyboard?.on('keyup-D', () => {
+            GlobalData.mode = Mode.Dot;
             this.updateButtons();
         });
 
         this.input.keyboard?.on('keyup-R', () => {
-            GlobalData.mode = 2;
+            GlobalData.mode = Mode.Rectangle;
             this.updateButtons();
         });
 
         this.input.keyboard?.on('keyup-C', () => {
-            GlobalData.mode = 3;
+            GlobalData.mode = Mode.Circle;
             this.updateButtons();
         });
 
         this.input.keyboard?.on('keyup-P', () => {
-            GlobalData.mode = 4;
+            GlobalData.mode = Mode.Polygon;
+            this.updateButtons();
+        });
+
+        this.input.keyboard?.on('keyup-M', () => {
+            GlobalData.mode = Mode.Move;
             this.updateButtons();
         });
     }

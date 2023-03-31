@@ -1,5 +1,6 @@
+import { Dot } from "../shapes/Dot";
 import { Rectangle } from "../shapes/Rectangle";
-import { Shape } from "../shapes/Shape";
+import { Shape, ShapeType } from "../shapes/Shape";
 import { ConvertGame } from "../utils/ConvertGame";
 import { ConvertPhaser } from "../utils/ConvertPhaser";
 import { ConvertScreen } from "../utils/ConvertScreen";
@@ -101,8 +102,8 @@ export class Editor extends Phaser.Scene {
             // update game pos
             // GlobalData.game.x = ConvertPhaser.xToGame(pointer.position.x, this) / GlobalData.zoom + ConvertPhaser.dimToGame(this.cameras.main.scrollX, this);
             // GlobalData.game.y = ConvertPhaser.yToGame(pointer.position.y, this) / GlobalData.zoom - ConvertPhaser.dimToGame(this.cameras.main.scrollY, this);
-            GlobalData.game.x = ConvertPhaser.xToGame(pointer.position.x, this);
-            GlobalData.game.y = ConvertPhaser.yToGame(pointer.position.y, this);
+            GlobalData.game.x = ConvertScreen.xToGame(pointer.position.x, this);
+            GlobalData.game.y = ConvertScreen.yToGame(pointer.position.y, this);
 
             // do shape editing?
             if (this.isEditing) {
@@ -128,8 +129,13 @@ export class Editor extends Phaser.Scene {
             
             if (pointer.button === 1) return;
             switch (GlobalData.mode) {
-                case Mode.Move: {
-
+                case Mode.Dot: {
+                    this.shapes.push(new Dot(
+                        this,
+                        ConvertScreen.xToGame(pointer.position.x, this),
+                        ConvertScreen.yToGame(pointer.position.y, this),
+                    ));
+                    this.activeShapeIdx = this.shapes.length - 1;
                     break;
                 }
                 case Mode.Rectangle: {
@@ -177,33 +183,24 @@ export class Editor extends Phaser.Scene {
     }
 
     generateLoadedRectangles() {
-        const rects = GlobalData.loadedData;
-        rects.map((r: any) => {
-            const rect = new Rectangle(
-                this, 
-                r.x,
-                r.y,
-                r.width,
-                r.height
-            )
-            this.shapes.push(rect);
-            rect.rect.setOrigin(0,1);
-            console.log(r);
-            this.activeShapeIdx = this.shapes.length - 1;
-
-
-
-            // const rect = this.add.rectangle(
-            //     ConvertGame.xToPhaser(r.x, this), 
-            //     ConvertGame.yToPhaser(r.y, this),
-            //     ConvertGame.dimToPhaser(r.width, this),
-            //     ConvertGame.dimToPhaser(r.height, this)
-            // );
-            // this.rectangles.push(new Rectangle(rect));
-            // rect.setFillStyle(0xffffff, 0.2);
-            // rect.setStrokeStyle(3, 0xff00ff);
-            // rect.setDepth(2);
-            // rect.setOrigin(0,1);
+        const shapes = GlobalData.loadedData;
+        shapes.forEach((shape: any) => {
+            switch (shape.type) {
+                case (ShapeType.RECTANGLE): {
+                    const rect = new Rectangle(
+                        this, 
+                        shape.x,
+                        shape.y,
+                        shape.width,
+                        shape.height
+                    )
+                    this.shapes.push(rect);
+                    rect.rect.setOrigin(0,1);
+                    this.activeShapeIdx = this.shapes.length - 1;
+                    break;
+                }
+                default: break;
+            }
         })
     }
 

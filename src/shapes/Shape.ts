@@ -1,5 +1,6 @@
 export enum ShapeType {
     BASE,
+    DOT,
     RECTANGLE,
     CIRCLE,
     POLYGON
