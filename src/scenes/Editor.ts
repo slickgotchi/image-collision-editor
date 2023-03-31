@@ -182,10 +182,18 @@ export class Editor extends Phaser.Scene {
         // })
     }
 
-    generateLoadedRectangles() {
+    generateShapesFromLoadedData() {
         const shapes = GlobalData.loadedData;
         shapes.forEach((shape: any) => {
             switch (shape.type) {
+                case (ShapeType.DOT): {
+                    this.shapes.push(new Dot(
+                        this,
+                        shape.x,
+                        shape.y
+                    ));
+                    break;
+                }
                 case (ShapeType.RECTANGLE): {
                     const rect = new Rectangle(
                         this, 

@@ -40,7 +40,7 @@ function readFile(evt: any) {
     var reader = new FileReader();
     reader.onload = function(event: any) {
         GlobalData.loadedData = JSON.parse(event.target.result);
-        GlobalData.editorRef?.generateLoadedRectangles();
+        GlobalData.editorRef?.generateShapesFromLoadedData();
         console.log(GlobalData.loadedData);
     }
     reader.readAsText(file)
